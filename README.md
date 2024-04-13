@@ -112,11 +112,11 @@ This repository contains a simple go app. You do not need to know go, nor use an
             tags: ghcr.io/${{ github.repository }}:latest
     ```
 
-    > [!NOTE]
-    > 
-    > The `${{ <expression> }}` syntax is used to access variables, call functions and more. You can read more in [the documentation](https://docs.github.com/en/actions/learn-github-actions/expressions).
-    >
-    > In this case, `${{ github.repository }}` is a variable from the [`github` context](https://docs.github.com/en/actions/learn-github-actions/contexts#github-context) refers to the owner or and repos, meaning the Docker image will be tagged with `ghcr.io/<user-or-org>/<repo-name>:latest`.
+> [!NOTE]
+> 
+> The `${{ <expression> }}` syntax is used to access variables, call functions and more. You can read more in [the documentation](https://docs.github.com/en/actions/learn-github-actions/expressions).
+>
+> In this case, `${{ github.repository }}` is a variable from the [`github` context](https://docs.github.com/en/actions/learn-github-actions/contexts#github-context) refers to the owner or and repos, meaning the Docker image will be tagged with `ghcr.io/<user-or-org>/<repo-name>:latest`.
 
 2. Push and verify that the action runs correctly.
 
@@ -141,8 +141,8 @@ This repository contains a simple go app. You do not need to know go, nor use an
               password: ${{ github.token }}
     ```
 
-    > [!NOTE]
-    > The `github.token` (often referred to as `GITHUB_TOKEN`) is a special token used to authenticate the workflow job. Read more about it here in [the documentation](https://docs.github.com/en/actions/security-guides/automatic-token-authentication).
+> [!NOTE]
+> The `github.token` (often referred to as `GITHUB_TOKEN`) is a special token used to authenticate the workflow job. Read more about it here in [the documentation](https://docs.github.com/en/actions/security-guides/automatic-token-authentication).
 
 5. Finally, modify the build and push step. Set `push: true` to make the action push the image after it's built.
 
@@ -202,8 +202,8 @@ on:
 3. Update the `test.yml` workflow and add the event for triggering the workflow manually. Make sure to push the change to main-branch.
 4. Go to the [GitHub Actions page of the workflow](/.github/workflows/test.yml) and verify that the workflow can be run manually. A `Run workflow` button should appear to enable you to manually trigger the workflow. 
 
-    > [!NOTE]
-    > In order for the `Run workflow`-button to appear the workflow must exist on the default branch, typically the main-branch
+> [!NOTE]
+> In order for the `Run workflow`-button to appear the workflow must exist on the default branch, typically the main-branch
 
 ## Manually triggering workflows
 
