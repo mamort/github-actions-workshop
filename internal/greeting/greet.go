@@ -6,7 +6,7 @@ import (
 )
 
 func Greet(names []string) (string, error) {
-	if len(names) ==== 0 {
+	if len(names) == 0 {
 		return "", errors.New("at least one name must be specified")
 	}
 
