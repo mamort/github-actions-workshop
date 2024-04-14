@@ -11,16 +11,16 @@ The tasks in the workshop can be done using only the built-in GitHub editor. How
 * The [GitHub CLI](https://github.com/cli/cli#installation)
 * [actionlint](https://github.com/rhysd/actionlint/blob/main/docs/install.md)
 * [ShellCheck](https://github.com/koalaman/shellcheck?tab=readme-ov-file#installing) (will be used by actionlint)
-* Editor with YAML and GitHub actions plugins (e.g., VS Code with the [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) and [GitHub Actions](https://marketplace.visualstudio.com/items?itemName=github.vscode-github-actions) exensions)
+* Editor with YAML and GitHub actions plugins (e.g., VS Code with the [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) and [GitHub Actions](https://marketplace.visualstudio.com/items?itemName=github.vscode-github-actions) extensions)
 
 
 ## Getting started
 
 TODO: Likely `gh repo fork --clone` or using the GitHub UI to fork the repo to a personal account
 
-This repository contains a simple go app. You do not need to know go, nor use any golang tooling. We will, unless explicitly specified otherwise, only modify files in the special `.github/` directory.
+This repository contains a simple go app. You do not need to know go, nor use any Golang tooling. We will, unless explicitly specified otherwise, only modify files in the special `.github/` directory.
 
-## Our first wokflow
+## Our first workflow
 
 1. We'll start with a simple workflow. Create the file `.github/workflows/test.yml` and with the following content:
 
@@ -54,13 +54,13 @@ This repository contains a simple go app. You do not need to know go, nor use an
 > 
 > * `name:` is only used for display in the GitHub UI
 > * `on:` specifies triggers - what causes this workflow to be run
-> * `jobs:` specifies each _job_ in the workflow. A job run on a single virtual machine with a given OS (here: `ubuntu-latest`), and the `steps` share the environment (filesystem, installed tools, environment variables, etc.). Different jobs have separate environments.
-> * `steps:` run sequentially, and might run shell scripts or an action (a reusable, pre-made piece of code). Each step can run conditionally. If a step fails, all later steps fail by default (this is overrideable).
+> * `jobs:` specifies each _job_ in the workflow. A job runs on a single virtual machine with a given OS (here: `ubuntu-latest`), and the `steps` share the environment (filesystem, installed tools, environment variables, etc.). Different jobs have separate environments.
+> * `steps:` run sequentially, and might run shell scripts or an action (a reusable, pre-made piece of code). Each step can run conditionally. If a step fails, all later steps fail by default (this is overridable).
 
 
 ## Build and test the application
 
-1. Let's use some pre-made actions to checkout our code, and install golang tooling. Replace the "hello world" step with the following steps:
+1. Let's use some pre-made actions to checkout our code, and install Golang tooling. Replace the "hello world" step with the following steps:
 
     ```yml
           # Checkout code
@@ -92,7 +92,7 @@ This repository contains a simple go app. You do not need to know go, nor use an
 
 ## Build Docker image
 
-1. In order to do a container-based deploy. A `Dockerfile` is in the root directory. We'll use actions provided by Docker to build the image.
+1. A `Dockerfile` defining the application image exists in the root directory. To do a container-based deploy we'll use the actions provided by Docker to build the image.
 
     ```yml
     on:
@@ -165,9 +165,6 @@ Jobs in the same workflow file can be run in parallel if they're not dependent o
 
 2. Push the code and verify that the workflow runs two jobs successfully.
 
-TODO:
-* Require build, tests & linting to succeed to merge PR
-
 ## Triggering workflows
 
 Workflows can be triggered in many different ways and can be grouped into four type of events:
@@ -185,7 +182,7 @@ on: pull_request # Triggers when a pull request is opened or changed
 on: workflow_dispatch # Triggers when a user manually requests a workflow to run
 ```
 
-Some events have filters can be applied to limit when the workflow should run. For example, the `push`-event has a `branches`-filter that can be used limit the workflow to only run if it is on a specific branch (or branches)
+Some events have filters that can be applied to limit when the workflow should run. For example, the `push`-event has a `branches`-filter that can be used limit the workflow to only run if it is on a specific branch (or branches)
 
 ```
 on:
@@ -202,21 +199,39 @@ on:
 3. Update the `test.yml` workflow and add the event for triggering the workflow manually. Make sure to push the change to main-branch.
 4. Go to the [GitHub Actions page of the workflow](/.github/workflows/test.yml) and verify that the workflow can be run manually. A `Run workflow` button should appear to enable you to manually trigger the workflow. 
 
-  > [!NOTE]
-  > In order for the `Run workflow`-button to appear the workflow must exist on the default branch, typically the main-branch
-
-## Manually triggering workflows
-
-TODO:
-* `on: workflow_dispatch`, run a job on a given branch
-
-* Limitations: Re-deploying a previous build, dynamically getting tags/sha
+> [!NOTE]
+> In order for the `Run workflow`-button to appear the workflow must exist on the default branch, typically the main-branch
 
 ## Reusable workflows
 
-TODO:
-* Create reusable workflow for running tests - replace jobs on PR and main pushes, use workflow_call
-* Create reusable workflow for build, with option to create and push docker image
+Reusable workflows makes it possible to avoid duplication and reuse common workflow-functionality. They can be [shared within a single repository or by the whole organization](https://docs.github.com/en/actions/using-workflows/reusing-workflows#access-to-reusable-workflows)
+
+To pass information to a shared workflow you should either use the `vars`-context or pass information directly to the workflow.
+
+Reusable workflows are very similar to manual workflows and use the `workflow_dispatch`-trigger. A simple reusable workflow that accepts a config value as input look like this:
+``` 
+on:
+  workflow_call:
+    inputs:
+      config-value:
+        required: true
+        type: string
+```
+
+### Calling a reusable workflow
+
+To call a reusable workflow in the same repository:
+```
+jobs:
+  call-workflow-passing-data:
+    uses: ./.github/workflows/my-reusable-workflow.yml
+    with:
+      config-value: 'Some value'
+```
+
+**Tasks**
+1. Create a reusable workflow that runs the test-job specified in `test.yml` and modify `test.yml` to use the reusable workflow for running the tests
+2. Create a reusable workflow for the `Build and push Docker image` step in `build.yml` and use a input-parameter to determine if the image should be pushed or not
 
 ## Deploying to environment
 
@@ -225,6 +240,29 @@ TODO:
 * Add environments test, prod in GitHub UI
 * Prod should be protected using branch protection rules or rulesets
 * Deploying
+
+## Branch protection rules
+
+Many teams want require code reviews, avoid accidental changes, run tests or ensure that the formatting is correct on all new code before merging. These restrictions can be done using [*branch protection rules*](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
+
+You can find branch protections rules by going to [Settings > Branches](../../settings/branches) (requires repository administrator privileges). Let's create a branch protection rule for the `main` branch:
+
+1. Set `main` as the branch name pattern.
+
+2. Set the setting "Require a pull request before merging", and untick the "Require Approvals" sub-setting.
+
+3. Set the setting "Require status checks to pass before merging", and make sure that both the jobs for linting and testing are selected.
+
+4. Set the "Do not allow bypassing the above settings" setting to disallow administrator overrides, and finally click "Create".
+
+5. Create a change (e.g. text change in the README). Try pushing the change from your local computer directly to `main` and verify that it gets rejected (if you're using the GitHub UI, you will be forced to create a branch).
+
+6. Create a change on a separate branch, push it and create a PR. Verify that you cannot merge it until the status checks have passed.
+
+7. Optionally, turn off the "Require a pull request before merging" and/or "Do not allow bypassing the above settings" settings before you continue, to simplify the rest of the workshop. Read through the list of settings once more and research options you want to know more about in [the documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
+
+> [!TIP]
+> Branch protection rules will disallow force pushes for everyone, including administrators, by default, but this can be turned on again in the settings.
 
 ## Extra: Environment variables and secrets
 
