@@ -4,6 +4,10 @@ name: Build and test
 # Trigger, run on push on any branch
 on:
   workflow_dispatch:
+    inputs:
+      config-value:
+        required: true
+        type: string
   pull_request:
 
 jobs:
@@ -15,25 +19,7 @@ jobs:
         run: |
           no_unformatted_files="$(gofmt -l $(git ls-files '*.go') | wc -l)"
           exit "$no_unformatted_files"
-  test: # The 'build' job
-    name: "Build application"
-    runs-on: 'ubuntu-latest'
-    steps:
-      # Checkout code
-      - uses: actions/checkout@v4
-
-      # Install go 1.21
-      - name: Setup go
-        uses: actions/setup-go@v4
-        with: # Specify input variables to the action
-          go-version: '1.21.x'
-
-      # Shell script to print the version
-      - run: go version
-
-      - name: Build
-        run: go build -v ./...
-  
-      - name: Test
-        run: go test ./...
-        
+  test: 
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      config-value: 'Some value'
