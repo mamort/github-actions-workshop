@@ -21,14 +21,12 @@ jobs:
           exit "$no_unformatted_files"
   test: 
     uses: ./.github/workflows/reusable-test.yml
-    with:
-      config-value: 'Some value'
   compositeTest:
     name: "Run composite action"
     runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v4
       - id: foo
-        uses: ./actions/test-composite@
+        uses: ./.github/actions/test-composite
         with:
           who-to-greet: 'Mona the Octocat'
